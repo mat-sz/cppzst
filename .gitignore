@@ -34,5 +34,6 @@
 # Node Related Folders
 build
 node_modules
+.yarn
 coverage
 .nyc_output
