@@ -1,6 +1,6 @@
 {
   "name": "cppzst",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Zstd wrapper for Nodejs 14 and above",
   "main": "index.mjs",
   "scripts": {
