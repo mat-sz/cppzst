@@ -2,6 +2,7 @@
 
 namespace ZSTD_NODE {
 
+  using Nan::CopyBuffer;
   using Nan::NewBuffer;
   using Nan::Set;
 
@@ -22,10 +23,10 @@ namespace ZSTD_NODE {
     for (size_t i = 0; i < nChunks; i++) {
       char *cur = pending_output[i];
       Allocator::AllocatedBuffer *bufInfo = Allocator::GetBufferInfo(cur);
-      Set(chunks, i, NewBuffer(reinterpret_cast<char*>(cur),
-                               bufInfo->size - bufInfo->available,
-                               Allocator::NodeFree,
-                               NULL).ToLocalChecked());
+      Set(chunks, i, CopyBuffer(reinterpret_cast<char*>(cur),
+                               bufInfo->size - bufInfo->available
+                               ).ToLocalChecked());
+      Allocator::Free(NULL, cur);
     }
 
     pending_output.clear();

@@ -70,7 +70,9 @@ namespace ZSTD_NODE {
     zcs = ZSTD_createCStream_advanced(zcm);
 
     if (dict != NULL && dictSize > 0) {
-      ZSTD_initCStream_usingDict(zcs, dict, dictSize, level);
+      ZSTD_CCtx_reset(zcs, ZSTD_reset_session_only);
+      ZSTD_CCtx_setParameter(zcs, ZSTD_c_compressionLevel, level);
+      ZSTD_CCtx_loadDictionary(zcs, dict, dictSize);
     } else {
       ZSTD_initCStream(zcs, level);
     }

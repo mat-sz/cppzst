@@ -64,7 +64,8 @@ namespace ZSTD_NODE {
     zds = ZSTD_createDStream_advanced(zcm);
 
     if (dict != NULL && dictSize > 0) {
-      ZSTD_initDStream_usingDict(zds, dict, dictSize);
+      ZSTD_DCtx_reset(zds, ZSTD_reset_session_only);
+      ZSTD_DCtx_loadDictionary(zds, dict, dictSize);
     } else {
       ZSTD_initDStream(zds);
     }

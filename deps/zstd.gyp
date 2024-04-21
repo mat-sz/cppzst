@@ -5,6 +5,7 @@
       "type": "static_library",
       "standlone_static_library": 1,
       "defines": [
+        "ZSTD_DISABLE_ASM"
       ],
 
       "include_dirs": [
@@ -42,6 +43,7 @@
       "type": "static_library",
       "standlone_static_library": 1,
       "defines": [
+        "ZSTD_DISABLE_ASM"
       ],
 
       "include_dirs": [
