@@ -7,6 +7,6 @@ namespace ZSTD_NODE {
     StreamCompressor::Init(target);
   }
 
-  NODE_MODULE(compressor, Init)
+  NAN_MODULE_WORKER_ENABLED(compressor, Init)
 
 }
