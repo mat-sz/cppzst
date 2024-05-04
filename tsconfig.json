@@ -13,8 +13,7 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "downlevelIteration": true,
-    "rootDir": "./src"
+    "downlevelIteration": true
   },
   "include": ["src"]
 }

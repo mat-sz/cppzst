@@ -1,6 +1,10 @@
 import stream, { TransformOptions } from "stream";
-import compressor from "./compressor.cjs";
-import decompressor from "./decompressor.cjs";
+import { StreamCompressor } from "./compressor.cjs";
+import { StreamDecompressor } from "./decompressor.cjs";
+import type {
+  StreamCompressorInstance,
+  StreamDecompressorInstance,
+} from "./types";
 
 export interface ZstdOptions {
   level?: number;
@@ -59,7 +63,7 @@ interface StreamStatus {
 }
 
 export class TransformStreamCompressor extends Transform {
-  compressor = new compressor.StreamCompressor(this.opts || {});
+  compressor = new StreamCompressor(this.opts || {});
   status: StreamStatus;
 
   constructor(
@@ -110,7 +114,7 @@ export class TransformStreamCompressor extends Transform {
 export function compressStreamChunk(
   stream: TransformStreamCompressor,
   chunk: Uint8Array,
-  compressor: any,
+  compressor: StreamCompressorInstance,
   status: StreamStatus,
   sync: boolean,
   done: (err?: any) => void
@@ -157,7 +161,7 @@ export function compressStream(opts?: ZstdOptions) {
 }
 
 export class TransformStreamDecompressor extends Transform {
-  decompressor = new decompressor.StreamDecompressor(this.opts || {});
+  decompressor = new StreamDecompressor(this.opts || {});
   status: StreamStatus;
 
   constructor(
@@ -204,7 +208,7 @@ export class TransformStreamDecompressor extends Transform {
 export function decompressStreamChunk(
   stream: TransformStreamDecompressor,
   chunk: Uint8Array,
-  decompressor: any,
+  decompressor: StreamDecompressorInstance,
   status: StreamStatus,
   sync: boolean,
   done: (err?: any) => void
