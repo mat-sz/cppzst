@@ -5,17 +5,17 @@
       "include_dirs": [
         "<!(node -e \"require('nan')\")",
         "deps/zstd/lib",
-        "src/common"
+        "src_native/common"
       ],
       "dependencies": [
         "<(module_root_dir)/deps/zstd.gyp:compress"
       ],
       "sources": [
-        "src/common/stream_coder.cc",
-        "src/common/allocator.cc",
-        "src/compress/compressor_index.cc",
-        "src/compress/stream_compressor.cc",
-        "src/compress/stream_compress_worker.cc"
+        "src_native/common/stream_coder.cc",
+        "src_native/common/allocator.cc",
+        "src_native/compress/compressor_index.cc",
+        "src_native/compress/stream_compressor.cc",
+        "src_native/compress/stream_compress_worker.cc"
       ],
       "conditions": [
         [
@@ -38,17 +38,17 @@
       "include_dirs": [
         "<!(node -e \"require('nan')\")",
         "deps/zstd/lib",
-        "src/common"
+        "src_native/common"
       ],
       "dependencies": [
         "<(module_root_dir)/deps/zstd.gyp:decompress"
       ],
       "sources": [
-        "src/common/stream_coder.cc",
-        "src/common/allocator.cc",
-        "src/decompress/decompressor_index.cc",
-        "src/decompress/stream_decompressor.cc",
-        "src/decompress/stream_decompress_worker.cc"
+        "src_native/common/stream_coder.cc",
+        "src_native/common/allocator.cc",
+        "src_native/decompress/decompressor_index.cc",
+        "src_native/decompress/stream_decompressor.cc",
+        "src_native/decompress/stream_decompress_worker.cc"
       ],
       "conditions": [
         [

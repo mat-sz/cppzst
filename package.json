@@ -4,16 +4,18 @@
   "description": "Zstd wrapper for Nodejs 14 and above",
   "exports": {
     ".": {
-      "require": "./index.cjs",
-      "import": "./index.mjs",
-      "types": "./index.d.ts"
+      "require": "./esm/index.js",
+      "import": "./cjs/index.js",
+      "types": "./esm/index.d.ts"
     }
   },
+  "type": "module",
   "scripts": {
     "test": "mocha -t 5000",
-    "build:dev": "node-gyp -j 16 build --debug",
-    "build": "node-gyp -j 16 build",
-    "rebuild:dev": "node-gyp -j 16 rebuild --debug",
+    "build": "npm run build:cjs && npm run build:esm && npm run build:native",
+    "build:esm": "tsc --module esnext --outDir esm && echo '{\"type\": \"module\"}' > esm/package.json",
+    "build:cjs": "tsc --module commonjs --outDir cjs && echo '{\"type\": \"commonjs\"}' > cjs/package.json",
+    "build:native": "node-gyp -j 16 build",
     "rebuild": "node-gyp -j 16 rebuild",
     "clean": "node-gyp clean"
   },
@@ -39,11 +41,18 @@
     "nan": "^2.19.0"
   },
   "devDependencies": {
+    "@types/node": "^20.12.8",
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
-    "node-gyp": "^10.1.0"
+    "node-gyp": "^10.1.0",
+    "typescript": "^5.4.5"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "binary": {
+    "napi_versions": [
+      9
+    ]
   }
 }
