@@ -11,7 +11,7 @@
   },
   "type": "module",
   "scripts": {
-    "test": "mocha -t 5000",
+    "test": "vitest",
     "build": "npm run build:cjs && npm run build:esm && npm run build:native",
     "build:esm": "tsc --module esnext --outDir esm && echo '{\"type\": \"module\"}' > esm/package.json",
     "build:cjs": "tsc --module commonjs --outDir cjs && echo '{\"type\": \"commonjs\"}' > cjs/package.json",
@@ -42,10 +42,9 @@
   },
   "devDependencies": {
     "@types/node": "^20.12.8",
-    "chai": "^4.3.7",
-    "mocha": "^10.2.0",
     "node-gyp": "^10.1.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
   },
   "publishConfig": {
     "access": "public"
