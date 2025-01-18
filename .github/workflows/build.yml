@@ -11,7 +11,6 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            container: rockylinux:8
             nodejs_arch: x64
             nodejs_version: "^18.20.5"
             nodejs_version_major: 18
@@ -21,15 +20,10 @@ jobs:
             nodejs_version_major: 18
             platform: linuxmusl-x64
           - os: ubuntu-22.04-arm
-            container: rockylinux:8
             nodejs_arch: arm64
             nodejs_version: "^18.20.5"
             nodejs_version_major: 18
             platform: linux-arm64
-          - os: ubuntu-22.04-arm
-            container: node:18-alpine3.17
-            nodejs_version_major: 18
-            platform: linuxmusl-arm64
           - os: macos-13
             nodejs_arch: x64
             nodejs_version: "^18.20.5"
@@ -49,21 +43,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     steps:
-      - name: Dependencies (Rocky Linux glibc)
-        if: contains(matrix.container, 'rockylinux')
-        run: |
-          dnf install -y gcc-toolset-11-gcc-c++ make git python3.12 fontconfig google-noto-sans-fonts
-          echo "/opt/rh/gcc-toolset-11/root/usr/bin" >> $GITHUB_PATH
       - name: Dependencies (Linux musl)
         if: contains(matrix.container, 'alpine')
-        run: apk add build-base git python3 font-noto --update-cache
-      - name: Dependencies (Python 3.11 - macOS, Windows)
-        if: contains(matrix.os, 'macos') || contains(matrix.os, 'windows')
+        run: apk add build-base git python3 --update-cache
+      - name: Dependencies (Python)
+        if: "!contains(matrix.container, 'alpine')"
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Dependencies (Node.js)
-        if: "!contains(matrix.platform, 'linuxmusl')"
+        if: "!contains(matrix.container, 'alpine')"
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.nodejs_version }}
