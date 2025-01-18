@@ -20,6 +20,16 @@ jobs:
             container: node:18-alpine3.17
             nodejs_version_major: 18
             platform: linuxmusl-x64
+          - os: ubuntu-22.04-arm
+            container: rockylinux:8
+            nodejs_arch: arm64
+            nodejs_version: "^18.20.5"
+            nodejs_version_major: 18
+            platform: linux-arm64
+          - os: ubuntu-22.04-arm
+            container: node:18-alpine3.17
+            nodejs_version_major: 18
+            platform: linuxmusl-arm64
           - os: macos-13
             nodejs_arch: x64
             nodejs_version: "^18.20.5"
@@ -73,53 +83,7 @@ jobs:
         name: Upload prebuild
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.os }}
-          path: prebuilds/
-          if-no-files-found: "error"
-          retention-days: 1
-          compression-level: 0
-
-  build_qemu:
-    permissions:
-      contents: write
-    name: ${{ matrix.platform }} - Node.js ${{ matrix.nodejs_version_major }} - prebuild
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: linux-arm64
-            distro: bullseye
-            run_on_arch: aarch64
-            nodejs_arch: arm64
-            nodejs_hostname: nodejs.org
-            nodejs_version: "18.20.5"
-            nodejs_version_major: 18
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: "recursive"
-      - uses: uraimo/run-on-arch-action@v2
-        with:
-          arch: ${{ matrix.run_on_arch }}
-          distro: ${{ matrix.distro }}
-          env: |
-            prebuild_upload: "${{ startsWith(github.ref, 'refs/tags/') && secrets.GITHUB_TOKEN || '' }}"
-          run: |
-            apt-get update
-            apt-get install -y curl g++ git libatomic1 make python3 xz-utils
-            mkdir /opt/nodejs
-            curl --silent https://${{ matrix.nodejs_hostname }}/download/release/v${{ matrix.nodejs_version}}/node-v${{ matrix.nodejs_version}}-linux-${{ matrix.nodejs_arch }}.tar.xz | tar xJC /opt/nodejs --strip-components=1
-            export PATH=$PATH:/opt/nodejs/bin
-            corepack enable yarn
-            yarn install
-            yarn prebuild
-
-      - id: upload
-        name: Upload prebuild
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-${{ matrix.os }}
+          name: build-${{ matrix.platform }}
           path: prebuilds/
           if-no-files-found: "error"
           retention-days: 1

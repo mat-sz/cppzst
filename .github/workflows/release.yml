@@ -30,6 +30,11 @@ jobs:
       - run: yarn install
       - run: yarn build
 
+      - uses: actions/download-artifact@v4
+        with:
+          path: prebuilds/
+          merge-multiple: true
+
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
