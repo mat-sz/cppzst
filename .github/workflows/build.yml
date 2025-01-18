@@ -60,8 +60,12 @@ jobs:
           architecture: ${{ matrix.nodejs_arch }}
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
       - name: Install
-        run: yarn install
+        run: |
+          corepack enable yarn
+          yarn install
       - name: Prebuild
         run: yarn prebuild
 
@@ -86,27 +90,15 @@ jobs:
         include:
           - platform: linux-arm
             distro: bullseye
-            run_on_arch: armv6
-            nodejs_arch: armv6l
+            run_on_arch: aarch64
+            nodejs_arch: arm64
             nodejs_hostname: unofficial-builds.nodejs.org
-            nodejs_version: "18.20.5"
-            nodejs_version_major: 18
-          - platform: linux-s390x
-            distro: bullseye
-            run_on_arch: s390x
-            nodejs_arch: s390x
-            nodejs_hostname: nodejs.org
-            nodejs_version: "18.20.5"
-            nodejs_version_major: 18
-          - platform: linux-ppc64
-            distro: bullseye
-            run_on_arch: ppc64le
-            nodejs_arch: ppc64le
-            nodejs_hostname: nodejs.org
             nodejs_version: "18.20.5"
             nodejs_version_major: 18
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
       - uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.run_on_arch }}
