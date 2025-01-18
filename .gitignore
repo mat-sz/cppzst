@@ -38,7 +38,5 @@ node_modules
 coverage
 .nyc_output
 
-/esm
-/cjs
-
+/lib
 /prebuilds

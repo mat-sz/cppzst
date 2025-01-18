@@ -2,7 +2,7 @@ import { Writable } from "stream";
 import fs from "fs/promises";
 import { createReadStream } from "fs";
 import path from "path";
-import { compressStream, decompressStream } from "../esm/index.js";
+import { compressStream, decompressStream } from "../lib/index.js";
 
 class BufferWriter extends Writable {
   data = Buffer.alloc(0);

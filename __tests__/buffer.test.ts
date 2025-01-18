@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { compress, decompress } from "../esm/index.js";
+import { compress, decompress } from "../lib/index.js";
 
 async function testBufferAsync(
   method: any,
@@ -9,10 +9,10 @@ async function testBufferAsync(
   params: any = {}
 ) {
   const buffer = await fs.readFile(
-    path.join(import.meta.dirname, "/fixtures/", bufferFile)
+    path.join(__dirname, "/fixtures/", bufferFile)
   );
   const result = await fs.readFile(
-    path.join(import.meta.dirname, "/fixtures/", resultFile)
+    path.join(__dirname, "/fixtures/", resultFile)
   );
 
   const output = await method(buffer, params);

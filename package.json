@@ -1,24 +1,22 @@
 {
   "name": "@metastable/cppzst",
   "version": "2.1.0",
-  "description": "Zstd wrapper for Nodejs 14 and above",
+  "description": "ZSTD streaming wrapper for node.js 18+",
   "exports": {
     ".": {
-      "types": "./esm/index.d.ts",
-      "require": "./esm/index.js",
-      "import": "./cjs/index.js"
+      "require": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/index.js"
+      }
     }
   },
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "test": "vitest",
-    "build": "npm run build:cjs && npm run build:esm && npm run compile",
-    "build:esm": "tsc --module esnext --outDir esm && echo '{\"type\": \"module\"}' > esm/package.json",
-    "build:cjs": "tsc --module commonjs --outDir cjs && echo '{\"type\": \"commonjs\"}' > cjs/package.json",
-    "clean": "node-gyp clean",
+    "build": "node-gyp-build && tsc",
+    "clean": "node-gyp clean && rm -rf lib",
     "install": "node-gyp-build",
-    "compile": "node-gyp rebuild",
-    "prebuild": "prebuildify --napi --tag-libc --strip"
+    "prebuildify": "prebuildify --napi --tag-libc --strip"
   },
   "repository": {
     "type": "git",

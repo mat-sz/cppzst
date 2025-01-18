@@ -1,6 +1,5 @@
-import stream, { TransformOptions } from "stream";
-import { StreamCompressor } from "./compressor.cjs";
-import { StreamDecompressor } from "./decompressor.cjs";
+import { Transform, TransformOptions } from "stream";
+import { StreamCompressor, StreamDecompressor } from "./cppzst.js";
 import type {
   StreamCompressorInstance,
   StreamDecompressorInstance,
@@ -10,8 +9,6 @@ export interface ZstdOptions {
   level?: number;
   dict?: string;
 }
-
-var Transform = stream.Transform;
 
 export function compress(input: Buffer, opts: ZstdOptions = {}) {
   return new Promise((resolve, reject) => {
@@ -91,16 +88,15 @@ export class TransformStreamCompressor extends Transform {
   }
 
   _flush(done: (err?: any) => void) {
-    var that = this;
     this.compressor.compress(
       true,
-      function (err: any, output: Uint8Array[]) {
+      (err: any, output: Uint8Array[]) => {
         if (err) {
           return done(err);
         }
         if (output) {
-          for (var i = 0; i < output.length; i++) {
-            that.push(output[i]);
+          for (const item of output) {
+            this.push(item);
           }
         }
         return done();
@@ -119,23 +115,23 @@ export function compressStreamChunk(
   sync: boolean,
   done: (err?: any) => void
 ) {
-  var length = chunk.length;
+  const length = chunk.length;
 
   if (length > status.remaining) {
-    var slicedChunk = chunk.slice(0, status.remaining);
+    const slicedChunk = chunk.slice(0, status.remaining);
     chunk = chunk.slice(status.remaining);
     status.remaining = status.blockSize;
 
     compressor.copy(slicedChunk);
     compressor.compress(
       false,
-      function (err: any, output: Uint8Array[]) {
+      (err: any, output: Uint8Array[]) => {
         if (err) {
           return done(err);
         }
         if (output) {
-          for (var i = 0; i < output.length; i++) {
-            stream.push(output[i]);
+          for (const item of output) {
+            stream.push(item);
           }
         }
         return compressStreamChunk(
@@ -189,14 +185,13 @@ export class TransformStreamDecompressor extends Transform {
   }
 
   _flush(done: (err?: any) => void) {
-    var that = this;
-    this.decompressor.decompress(function (err: any, output: Uint8Array[]) {
+    this.decompressor.decompress((err: any, output: Uint8Array[]) => {
       if (err) {
         return done(err);
       }
       if (output) {
-        for (var i = 0; i < output.length; i++) {
-          that.push(output[i]);
+        for (const item of output) {
+          this.push(item);
         }
       }
       return done();
@@ -213,21 +208,21 @@ export function decompressStreamChunk(
   sync: boolean,
   done: (err?: any) => void
 ) {
-  var length = chunk.length;
+  const length = chunk.length;
 
   if (length > status.remaining) {
-    var slicedChunk = chunk.slice(0, status.remaining);
+    const slicedChunk = chunk.slice(0, status.remaining);
     chunk = chunk.slice(status.remaining);
     status.remaining = status.blockSize;
 
     decompressor.copy(slicedChunk);
-    decompressor.decompress(function (err: any, output: Uint8Array[]) {
+    decompressor.decompress((err: any, output: Uint8Array[]) => {
       if (err) {
         return done(err);
       }
       if (output) {
-        for (var i = 0; i < output.length; i++) {
-          stream.push(output[i]);
+        for (const item of output) {
+          stream.push(item);
         }
       }
       return decompressStreamChunk(
