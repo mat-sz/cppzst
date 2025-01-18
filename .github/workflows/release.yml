@@ -35,6 +35,6 @@ jobs:
           path: prebuilds/
           merge-multiple: true
 
-      - run: npm publish
+      - run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
