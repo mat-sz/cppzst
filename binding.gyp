@@ -28,7 +28,7 @@
         ],
         [
           "OS=='linux'", {
-            "cflags_cc": [ "-std=c++17" ]
+            "cflags_cc": [ "-std=c++20" ]
           }
         ]
       ]
@@ -61,7 +61,7 @@
         ],
         [
           "OS=='linux'", {
-            "cflags_cc": [ "-std=c++17" ]
+            "cflags_cc": [ "-std=c++20" ]
           }
         ]
       ]

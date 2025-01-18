@@ -4,20 +4,21 @@
   "description": "Zstd wrapper for Nodejs 14 and above",
   "exports": {
     ".": {
+      "types": "./esm/index.d.ts",
       "require": "./esm/index.js",
-      "import": "./cjs/index.js",
-      "types": "./esm/index.d.ts"
+      "import": "./cjs/index.js"
     }
   },
   "type": "module",
   "scripts": {
     "test": "vitest",
-    "build": "npm run build:cjs && npm run build:esm && npm run build:native",
+    "build": "npm run build:cjs && npm run build:esm && npm run compile",
     "build:esm": "tsc --module esnext --outDir esm && echo '{\"type\": \"module\"}' > esm/package.json",
     "build:cjs": "tsc --module commonjs --outDir cjs && echo '{\"type\": \"commonjs\"}' > cjs/package.json",
-    "build:native": "node-gyp -j 16 build",
-    "rebuild": "node-gyp -j 16 rebuild",
-    "clean": "node-gyp clean"
+    "clean": "node-gyp clean",
+    "install": "node-gyp-build",
+    "compile": "node-gyp rebuild",
+    "prebuild": "prebuildify --napi --strip"
   },
   "repository": {
     "type": "git",
@@ -38,13 +39,15 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "nan": "^2.19.0"
+    "nan": "^2.22.0",
+    "node-gyp-build": "^4.8.4"
   },
   "devDependencies": {
-    "@types/node": "^20.12.8",
-    "node-gyp": "^10.1.0",
-    "typescript": "^5.4.5",
-    "vitest": "^1.6.0"
+    "@types/node": "^22.10.7",
+    "node-gyp": "^11.0.0",
+    "prebuildify": "^6.0.1",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.2"
   },
   "publishConfig": {
     "access": "public"
