@@ -1,0 +1,35 @@
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+name: Release
+
+jobs:
+  build:
+    name: "Perform any build or bundling steps, as necessary."
+    uses: ./.github/workflows/build.yml
+
+  publish:
+    needs: [build]
+    environment: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18.x"
+          cache: "yarn"
+      - run: yarn install
+      - run: yarn build
+
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

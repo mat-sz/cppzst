@@ -20,7 +20,7 @@ jobs:
             container: node:18-alpine3.17
             nodejs_version_major: 18
             platform: linuxmusl-x64
-          - os: macos-12
+          - os: macos-13
             nodejs_arch: x64
             nodejs_version: "^18.20.5"
             nodejs_version_major: 18
@@ -88,11 +88,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: linux-arm
+          - platform: linux-arm64
             distro: bullseye
             run_on_arch: aarch64
             nodejs_arch: arm64
-            nodejs_hostname: unofficial-builds.nodejs.org
+            nodejs_hostname: nodejs.org
             nodejs_version: "18.20.5"
             nodejs_version_major: 18
     steps:

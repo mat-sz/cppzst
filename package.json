@@ -18,7 +18,7 @@
     "clean": "node-gyp clean",
     "install": "node-gyp-build",
     "compile": "node-gyp rebuild",
-    "prebuild": "prebuildify --napi --strip"
+    "prebuild": "prebuildify --napi --tag-libc --strip"
   },
   "repository": {
     "type": "git",

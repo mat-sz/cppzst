@@ -23,5 +23,5 @@ jobs:
           node-version: "18.x"
           cache: "yarn"
       - run: yarn install
-      - run: yarn compile
+      - run: yarn build
       - run: yarn test
