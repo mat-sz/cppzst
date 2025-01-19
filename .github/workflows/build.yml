@@ -67,7 +67,7 @@ jobs:
           corepack enable yarn
           yarn install
       - name: Prebuild
-        run: yarn prebuildify
+        run: yarn run-prebuildify
 
       - id: upload
         name: Upload prebuild

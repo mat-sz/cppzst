@@ -2,21 +2,15 @@
   "name": "@metastable/cppzst",
   "version": "2.2.0",
   "description": "ZSTD streaming wrapper for node.js 18+",
-  "exports": {
-    ".": {
-      "require": {
-        "types": "./lib/index.d.ts",
-        "default": "./lib/index.js"
-      }
-    }
-  },
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "type": "commonjs",
   "scripts": {
     "test": "vitest",
     "build": "node-gyp-build && tsc",
     "clean": "node-gyp clean && rm -rf lib",
     "install": "node-gyp-build",
-    "prebuildify": "prebuildify --napi --tag-libc --strip"
+    "run-prebuildify": "prebuildify --napi --tag-libc -n cppzst --strip"
   },
   "repository": {
     "type": "git",
@@ -38,7 +32,7 @@
   "license": "MIT",
   "dependencies": {
     "node-addon-api": "^8.3.0",
-    "nan": "^2.22.0"
+    "node-gyp-build": "^4.8.4"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
