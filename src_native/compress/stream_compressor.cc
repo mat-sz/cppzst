@@ -3,59 +3,41 @@
 
 namespace ZSTD_NODE {
 
-  using Nan::SetPrototypeMethod;
-  using Nan::GetCurrentContext;
-  using Nan::AsyncQueueWorker;
-  using Nan::GetFunction;
-  using Nan::HandleScope;
-  using Nan::ObjectWrap;
-  using Nan::NewBuffer;
-  using Nan::Callback;
-  using Nan::Has;
-  using Nan::Get;
-  using Nan::Set;
+  Napi::Object StreamCompressor::Init(Napi::Env env, Napi::Object exports) {
+    Napi::Function func =
+      DefineClass(env,
+                  "StreamCompressor",
+                  {InstanceMethod("getBlockSize", &StreamCompressor::GetBlockSize),
+                   InstanceMethod("copy", &StreamCompressor::Copy),
+                   InstanceMethod("compress", &StreamCompressor::Compress)});
 
-  using node::Buffer::Length;
-  using node::Buffer::Data;
-
-  using v8::FunctionTemplate;
-  using v8::Number;
-  using v8::Isolate;
-  using v8::String;
-  using v8::Local;
-  using v8::Value;
-
-  NAN_MODULE_INIT(StreamCompressor::Init) {
-    Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
-    tpl->SetClassName(Nan::New("StreamCompressor").ToLocalChecked());
-    tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-    SetPrototypeMethod(tpl, "getBlockSize", GetBlockSize);
-    SetPrototypeMethod(tpl, "copy", Copy);
-    SetPrototypeMethod(tpl, "compress", Compress);
-
-    constructor().Reset(GetFunction(tpl).ToLocalChecked());
-    Set(target, Nan::New("StreamCompressor").ToLocalChecked(),
-        GetFunction(tpl).ToLocalChecked());
+    exports.Set("StreamCompressor", func);
+    return exports;
   }
 
-  StreamCompressor::StreamCompressor(Local<Object> userParams) :  zcs(NULL), dict(NULL) {
-    HandleScope scope;
+  StreamCompressor::StreamCompressor(const Napi::CallbackInfo& info)
+      : StreamCoder(), Napi::ObjectWrap<StreamCompressor>(info), zcs(NULL), dict(NULL) {
+    Napi::Env env = info.Env();
 
-    int level = 1;
+    if (info.Length() <= 0 || !info[0].IsObject()) {
+      Napi::TypeError::New(env, "Object expected").ThrowAsJavaScriptException();
+      return;
+    }
+
+    Napi::Object userParams = info[0].As<Napi::Object>();
+
+    int32_t level = 1;
     size_t dictSize = 0;
 
-    Local<String> key;
-    key = Nan::New<String>("level").ToLocalChecked();
-    if (Has(userParams, key).FromJust()) {
-      level = Nan::To<int32_t>(Get(userParams, key).ToLocalChecked()).FromJust();
+    if (userParams.Has("level")) {
+      Napi::Number levelNum = userParams.Get("level").As<Napi::Number>();
+      level = levelNum.Int32Value();
     }
-    key = Nan::New<String>("dict").ToLocalChecked();
-    if (Has(userParams, key).FromJust()) {
-      Local<Object> dictBuf = Get(userParams, key).ToLocalChecked()->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-      dictSize = Length(dictBuf);
+    if (userParams.Has("dict")) {
+      Napi::Buffer<char> dictBuf = userParams.Get("dict").As<Napi::Buffer<char>>();
+      dictSize = dictBuf.Length();
       dict = alloc.Alloc(dictSize);
-      memcpy(dict, Data(dictBuf), dictSize);
+      memcpy(dict, dictBuf.Data(), dictSize);
     }
 
     inputSize = ZSTD_CStreamInSize();
@@ -91,50 +73,37 @@ namespace ZSTD_NODE {
     ZSTD_freeCStream(zcs);
   }
 
-  NAN_METHOD(StreamCompressor::New) {
-    if (!info.IsConstructCall()) {
-      return Nan::ThrowError("StreamCompressor() must be called as a constructor");
-    }
-    StreamCompressor *sc = new StreamCompressor(info[0]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
-    sc->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
+  Napi::Value StreamCompressor::GetBlockSize(const Napi::CallbackInfo& info) {
+    return Napi::Number::New(info.Env(), ZSTD_CStreamInSize());
   }
 
-  NAN_METHOD(StreamCompressor::GetBlockSize) {
-    info.GetReturnValue().Set(Nan::New<Number>(ZSTD_CStreamInSize()));
-  }
-
-  NAN_METHOD(StreamCompressor::Copy) {
-    StreamCompressor* sc = ObjectWrap::Unwrap<StreamCompressor>(info.Holder());
-    auto chunkBuf = info[0]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-    char *chunk = Data(chunkBuf);
-    size_t chunkSize = Length(chunkBuf);
+  void StreamCompressor::Copy(const Napi::CallbackInfo& info) {
+    Napi::Buffer<char> chunkBuf = info[0].As<Napi::Buffer<char>>();
+    char *chunk = chunkBuf.Data();
+    size_t chunkSize = chunkBuf.Length();
     if (chunkSize != 0) {
-      if (sc->inPos == sc->inputSize) {
-        sc->inPos = 0;
+      if (this->inPos == this->inputSize) {
+        this->inPos = 0;
       }
-      char *pos = static_cast<char*>(sc->input) + sc->inPos;
+      char *pos = static_cast<char*>(this->input) + this->inPos;
       memcpy(pos, chunk, chunkSize);
-      sc->inPos += chunkSize;
+      this->inPos += chunkSize;
     }
   }
 
-  NAN_METHOD(StreamCompressor::Compress) {
-    StreamCompressor* sc = ObjectWrap::Unwrap<StreamCompressor>(info.Holder());
-    bool isLast = Nan::To<bool>(info[0]).FromJust();
-    Callback *callback = new Callback(info[1].As<Function>());
-    StreamCompressWorker *worker = new StreamCompressWorker(callback, sc, isLast);
-    if (Nan::To<bool>(info[2]).FromJust()) {
-      AsyncQueueWorker(worker);
+  void StreamCompressor::Compress(const Napi::CallbackInfo& info) {
+
+    Napi::Boolean isLast = info[0].As<Napi::Boolean>();
+    Napi::Function callback = info[1].As<Napi::Function>();
+    Napi::Boolean sync = info[2].As<Napi::Boolean>();
+
+    StreamCompressWorker *worker = new StreamCompressWorker(callback, this, isLast.Value());
+    if (sync.Value()) {
+      worker->Queue();
     } else {
       worker->Execute();
-      worker->WorkComplete();
+      worker->OnWorkComplete(info.Env(), napi_ok);
     }
-  }
-
-  inline Persistent<Function>& StreamCompressor::constructor() {
-    static Persistent<Function> ctor;
-    return ctor;
   }
 
 }

@@ -1,9 +1,7 @@
-#include <nan.h>
+#include <napi.h>
 #include "allocator.h"
 
 namespace ZSTD_NODE {
-
-  using Nan::AdjustExternalMemory;
 
   void* Allocator::Alloc(void* opaque, size_t size) {
     return static_cast<Allocator*>(opaque)->Alloc(size);
@@ -35,7 +33,8 @@ namespace ZSTD_NODE {
       Allocator* alloc = static_cast<Allocator*>(opaque);
       alloc->allocated_unreported_memory -= buf->size + sizeof(*buf);
     } else {
-      Nan::AdjustExternalMemory(-(buf->size + sizeof(*buf)));
+      // TODO: Fix memory management.
+      // Napi::MemoryManagement::AdjustExternalMemory(napi_env(), -(buf->size + sizeof(*buf)));
     }
 
     free(buf);
@@ -46,7 +45,8 @@ namespace ZSTD_NODE {
   }
 
   void Allocator::ReportMemoryToV8() {
-    AdjustExternalMemory(allocated_unreported_memory);
+    // TODO: Fix memory management.
+    // Napi::MemoryManagement::AdjustExternalMemory(napi_env(), allocated_unreported_memory);
     allocated_unreported_memory = 0;
   }
 

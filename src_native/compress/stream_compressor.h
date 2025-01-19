@@ -1,7 +1,7 @@
 #ifndef STREAM_COMPRESSOR_H
 #define STREAM_COMPRESSOR_H
 
-#include <nan.h>
+#include <napi.h>
 
 #define ZSTD_STATIC_LINKING_ONLY
 #include "zstd.h"
@@ -9,27 +9,17 @@
 
 namespace ZSTD_NODE {
 
-  using Nan::Persistent;
-
-  using v8::Function;
-  using v8::Object;
-  using v8::Local;
-
-  class StreamCompressor : public StreamCoder {
+  class StreamCompressor : public StreamCoder, public Napi::ObjectWrap<StreamCompressor> {
   public:
     friend class StreamCompressWorker;
-    static NAN_MODULE_INIT(Init);
-
-  private:
-    explicit StreamCompressor(Local<Object> userParams);
+    static Napi::Object Init(Napi::Env env, Napi::Object exports);
+    StreamCompressor(const Napi::CallbackInfo& info);
     ~StreamCompressor();
 
-    static NAN_METHOD(New);
-    static NAN_METHOD(GetBlockSize);
-    static NAN_METHOD(Copy);
-    static NAN_METHOD(Compress);
-
-    static inline Persistent<Function>& constructor();
+  private:
+    Napi::Value GetBlockSize(const Napi::CallbackInfo& info);
+    void Copy(const Napi::CallbackInfo& info);
+    void Compress(const Napi::CallbackInfo& info);
 
     ZSTD_CStream *zcs;
 

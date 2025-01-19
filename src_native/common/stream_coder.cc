@@ -2,10 +2,6 @@
 
 namespace ZSTD_NODE {
 
-  using Nan::CopyBuffer;
-  using Nan::NewBuffer;
-  using Nan::Set;
-
   StreamCoder::StreamCoder() {};
 
   StreamCoder::~StreamCoder() {
@@ -16,16 +12,16 @@ namespace ZSTD_NODE {
     alloc.ReportMemoryToV8();
   }
 
-  Local<Array> StreamCoder::PendingChunksAsArray() {
+  Napi::Array StreamCoder::PendingChunksAsArray(const Napi::Env& env) {
     size_t nChunks = pending_output.size();
-    Local<Array> chunks = Nan::New<Array>(nChunks);
+    Napi::Array chunks = Napi::Array::New(env);
 
     for (size_t i = 0; i < nChunks; i++) {
       char *cur = pending_output[i];
       Allocator::AllocatedBuffer *bufInfo = Allocator::GetBufferInfo(cur);
-      Set(chunks, i, CopyBuffer(reinterpret_cast<char*>(cur),
-                               bufInfo->size - bufInfo->available
-                               ).ToLocalChecked());
+      chunks.Set(i, Napi::Buffer<char>::Copy(env, reinterpret_cast<char*>(cur),
+        bufInfo->size - bufInfo->available
+      ));
       Allocator::Free(NULL, cur);
     }
 

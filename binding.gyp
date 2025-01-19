@@ -3,9 +3,18 @@
     {
       "target_name": "cppzst",
       "include_dirs": [
-        "<!(node -e \"require('nan')\")",
+        "<!@(node -p \"require('node-addon-api').include\")",
         "deps/zstd/lib",
         "src_native/common"
+      ],
+      "cflags!": [ "-fno-exceptions" ],
+      "cflags_cc!": [ "-fno-exceptions" ],
+      "defines": [
+        "NAPI_VERSION=9",
+        "NODE_ADDON_API_DISABLE_DEPRECATED",
+        "NAPI_DISABLE_CPP_EXCEPTIONS",
+        "NODE_API_SWALLOW_UNTHROWABLE_EXCEPTIONS",
+        "NODE_ADDON_API_ENABLE_TYPE_CHECK_ON_AS"
       ],
       "dependencies": [
         "<(module_root_dir)/deps/zstd.gyp:compress",
@@ -20,25 +29,6 @@
         "src_native/decompress/stream_decompress_worker.cc",
         "src_native/index.cc"
       ],
-      "conditions": [
-        [
-          "OS == 'mac'", {
-            "xcode_settings": {
-              "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
-              "MACOSX_DEPLOYMENT_TARGET": "10.12",
-              "OTHER_CFLAGS": [
-                "-std=c++20",
-                "-stdlib=libc++"
-              ],
-            }
-          }
-        ],
-        [
-          "OS=='linux'", {
-            "cflags_cc": [ "-std=c++20" ]
-          }
-        ]
-      ]
     }
   ]
 }

@@ -2,15 +2,7 @@
 
 namespace ZSTD_NODE {
 
-  using Nan::HandleScope;
-  using Nan::Callback;
-  using Nan::Error;
-
-  using v8::String;
-  using v8::Local;
-  using v8::Value;
-
-  StreamCompressWorker::StreamCompressWorker(Callback *callback, StreamCompressor* sc, bool isLast)
+  StreamCompressWorker::StreamCompressWorker(const Napi::Function& callback, StreamCompressor* sc, bool isLast)
     : AsyncWorker(callback), sc(sc), isLast(isLast) {
     zInBuf = {sc->input, sc->inPos, 0};
     zOutBuf = {sc->dst, sc->dstSize, 0};
@@ -23,7 +15,7 @@ namespace ZSTD_NODE {
       zOutBuf.pos = 0;
       ret = ZSTD_compressStream(sc->zcs, &zOutBuf, &zInBuf);
       if (ZSTD_isError(ret)) {
-        SetErrorMessage(ZSTD_getErrorName(ret));
+        SetError(ZSTD_getErrorName(ret));
         return;
       }
       pushToPendingOutput();
@@ -33,7 +25,7 @@ namespace ZSTD_NODE {
       zOutBuf.pos = 0;
       ret = ZSTD_endStream(sc->zcs, &zOutBuf);
       if (ret != 0) {
-        SetErrorMessage("ZSTD compress failed, not fully flushed");
+        SetError("ZSTD compress failed, not fully flushed");
         return;
       }
       pushToPendingOutput();
@@ -43,7 +35,7 @@ namespace ZSTD_NODE {
   void StreamCompressWorker::pushToPendingOutput() {
     char *output = static_cast<char*>(sc->alloc.Alloc(zOutBuf.pos));
     if (output == NULL) {
-      SetErrorMessage("ZSTD compress failed, out of memory");
+      SetError("ZSTD compress failed, out of memory");
       return;
     }
     memcpy(output, zOutBuf.dst, zOutBuf.pos);
@@ -52,27 +44,19 @@ namespace ZSTD_NODE {
     sc->pending_output.push_back(output);
   }
 
-  void StreamCompressWorker::HandleOKCallback() {
-    HandleScope scope;
-
-    const int argc = 2;
-    Local<Value> argv[argc] = {
-      Nan::Null(),
-      sc->PendingChunksAsArray()
-    };
-    callback->Call(argc, argv, async_resource);
+  void StreamCompressWorker::OnOK() {
+    Callback().Call({
+      Env().Null(),
+      sc->PendingChunksAsArray(Env())
+    });
 
     sc->alloc.ReportMemoryToV8();
   }
 
-  void StreamCompressWorker::HandleErrorCallback() {
-    HandleScope scope;
-
-    const int argc = 1;
-    Local<Value> argv[argc] = {
-      Error(Nan::New<String>(ErrorMessage()).ToLocalChecked())
-    };
-    callback->Call(argc, argv, async_resource);
+  void StreamCompressWorker::OnError(const Napi::Error& e) {
+    Callback().Call({
+      e.Value()
+    });
 
     sc->alloc.ReportMemoryToV8();
   }

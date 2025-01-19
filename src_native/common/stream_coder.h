@@ -1,27 +1,23 @@
 #ifndef STREAM_CODER_H
 #define STREAM_CODER_H
 
-#include <nan.h>
+#include <napi.h>
 #include "allocator.h"
 
 namespace ZSTD_NODE {
 
-  using Nan::ObjectWrap;
+  using Napi::ObjectWrap;
 
   using std::vector;
 
-  using v8::Array;
-  using v8::Local;
-
-  class StreamCoder : public ObjectWrap {
+  class StreamCoder {
   public:
     Allocator alloc;
 
     vector<char*> pending_output;
-    Local<Array> PendingChunksAsArray();
+    Napi::Array PendingChunksAsArray(const Napi::Env& env);
 
-  protected:
-    explicit StreamCoder();
+    StreamCoder();
     ~StreamCoder();
   };
 

@@ -1,22 +1,19 @@
 #ifndef STREAM_COMPRESS_WORKER_H
 #define STREAM_COMPRESS_WORKER_H
 
-#include <nan.h>
+#include <napi.h>
 #include "stream_compressor.h"
 
 namespace ZSTD_NODE {
 
-  using Nan::AsyncWorker;
-  using Nan::Callback;
-
-  class StreamCompressWorker : public AsyncWorker {
+  class StreamCompressWorker : public Napi::AsyncWorker {
   public:
-    StreamCompressWorker(Callback *callback, StreamCompressor *sc, bool isLast);
+    StreamCompressWorker(const Napi::Function& callback, StreamCompressor* sc, bool isLast);
     ~StreamCompressWorker();
 
     void Execute();
-    void HandleOKCallback();
-    void HandleErrorCallback();
+    void OnOK();
+    void OnError(const Napi::Error& e);
 
   private:
     void pushToPendingOutput();

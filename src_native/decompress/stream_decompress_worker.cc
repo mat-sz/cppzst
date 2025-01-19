@@ -2,15 +2,7 @@
 
 namespace ZSTD_NODE {
 
-  using Nan::HandleScope;
-  using Nan::Callback;
-  using Nan::Error;
-
-  using v8::String;
-  using v8::Local;
-  using v8::Value;
-
-  StreamDecompressWorker::StreamDecompressWorker(Callback *callback, StreamDecompressor* sd)
+  StreamDecompressWorker::StreamDecompressWorker(const Napi::Function& callback, StreamDecompressor* sd)
     : AsyncWorker(callback), sd(sd) {
     zInBuf = {sd->input, sd->inPos, 0};
     zOutBuf = {sd->dst, sd->dstSize, 0};
@@ -23,7 +15,7 @@ namespace ZSTD_NODE {
       zOutBuf.pos = 0;
       ret = ZSTD_decompressStream(sd->zds, &zOutBuf, &zInBuf);
       if (ZSTD_isError(ret)) {
-        SetErrorMessage(ZSTD_getErrorName(ret));
+        SetError(ZSTD_getErrorName(ret));
         return;
       }
       pushToPendingOutput();
@@ -33,7 +25,7 @@ namespace ZSTD_NODE {
   void StreamDecompressWorker::pushToPendingOutput() {
     char *output = static_cast<char*>(sd->alloc.Alloc(zOutBuf.pos));
     if (output == NULL) {
-      SetErrorMessage("ZSTD decompress failed, out of memory");
+      SetError("ZSTD decompress failed, out of memory");
       return;
     }
     memcpy(output, zOutBuf.dst, zOutBuf.pos);
@@ -42,27 +34,19 @@ namespace ZSTD_NODE {
     sd->pending_output.push_back(output);
   }
 
-  void StreamDecompressWorker::HandleOKCallback() {
-    HandleScope scope;
-
-    const int argc = 2;
-    Local<Value> argv[argc] = {
-      Nan::Null(),
-      sd->PendingChunksAsArray()
-    };
-    callback->Call(argc, argv, async_resource);
+  void StreamDecompressWorker::OnOK() {
+    Callback().Call({
+      Env().Null(),
+      sd->PendingChunksAsArray(Env())
+    });
 
     sd->alloc.ReportMemoryToV8();
   }
 
-  void StreamDecompressWorker::HandleErrorCallback() {
-    HandleScope scope;
-
-    const int argc = 1;
-    Local<Value> argv[argc] = {
-      Error(Nan::New<String>(ErrorMessage()).ToLocalChecked())
-    };
-    callback->Call(argc, argv, async_resource);
+  void StreamDecompressWorker::OnError(const Napi::Error& e) {
+    Callback().Call({
+      e.Value()
+    });
 
     sd->alloc.ReportMemoryToV8();
   }
