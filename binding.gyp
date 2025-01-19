@@ -7,18 +7,31 @@
         "deps/zstd/lib",
         "src_native/common"
       ],
-      "cflags!": [ "-fno-exceptions" ],
-      "cflags_cc!": [ "-fno-exceptions" ],
+      "cflags_cc": [
+        "-std=c++20",
+        "-fexceptions",
+        "-Wall",
+        "-Os"
+      ],
+      "xcode_settings": {
+        "CLANG_CXX_LANGUAGE_STANDARD": "c++20",
+        "MACOSX_DEPLOYMENT_TARGET": "10.13",
+        "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
+        "OTHER_CPLUSPLUSFLAGS": [
+          "-fexceptions",
+          "-Wall",
+          "-Oz"
+        ]
+      },
       "defines": [
         "NAPI_VERSION=9",
         "NODE_ADDON_API_DISABLE_DEPRECATED",
-        "NAPI_DISABLE_CPP_EXCEPTIONS",
+        "NAPI_CPP_EXCEPTIONS",
         "NODE_API_SWALLOW_UNTHROWABLE_EXCEPTIONS",
         "NODE_ADDON_API_ENABLE_TYPE_CHECK_ON_AS"
       ],
       "dependencies": [
-        "<(module_root_dir)/deps/zstd.gyp:compress",
-        "<(module_root_dir)/deps/zstd.gyp:decompress"
+        "<(module_root_dir)/deps/zstd.gyp:zstd",
       ],
       "sources": [
         "src_native/common/stream_coder.cc",
