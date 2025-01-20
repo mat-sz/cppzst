@@ -52,9 +52,14 @@ namespace ZSTD_NODE {
     } else {
       ZSTD_initDStream(zds);
     }
+
+    auto cleanup_hook = [this, env]() {
+      this->Cleanup(env);
+    };
+    env.AddCleanupHook(cleanup_hook);
   }
 
-  StreamDecompressor::~StreamDecompressor() {
+  void StreamDecompressor::Cleanup(const Napi::Env& env) {
     if (dict != NULL) {
       alloc.Free(dict);
     }
@@ -65,6 +70,7 @@ namespace ZSTD_NODE {
       alloc.Free(dst);
     }
     ZSTD_freeDStream(zds);
+    StreamCoder::Cleanup(env);
   }
 
   Napi::Value StreamDecompressor::GetBlockSize(const Napi::CallbackInfo& info) {

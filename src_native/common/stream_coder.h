@@ -16,9 +16,9 @@ namespace ZSTD_NODE {
 
     vector<char*> pending_output;
     Napi::Array PendingChunksAsArray(const Napi::Env& env);
+    void Cleanup(const Napi::Env& env);
 
     StreamCoder();
-    ~StreamCoder();
   };
 
 }

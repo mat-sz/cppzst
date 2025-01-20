@@ -28,14 +28,8 @@ namespace ZSTD_NODE {
       return;
 
     AllocatedBuffer* buf = GetBufferInfo(address);
-
-    if (opaque) {
-      Allocator* alloc = static_cast<Allocator*>(opaque);
-      alloc->allocated_unreported_memory -= buf->size + sizeof(*buf);
-    } else {
-      // TODO: Fix memory management.
-      // Napi::MemoryManagement::AdjustExternalMemory(napi_env(), -(buf->size + sizeof(*buf)));
-    }
+    Allocator* alloc = static_cast<Allocator*>(opaque);
+    alloc->allocated_unreported_memory -= buf->size + sizeof(*buf);
 
     free(buf);
   }
@@ -44,9 +38,8 @@ namespace ZSTD_NODE {
     Free(this, address);
   }
 
-  void Allocator::ReportMemoryToV8() {
-    // TODO: Fix memory management.
-    // Napi::MemoryManagement::AdjustExternalMemory(napi_env(), allocated_unreported_memory);
+  void Allocator::ReportMemoryToV8(const Napi::Env& env) {
+    Napi::MemoryManagement::AdjustExternalMemory(env, allocated_unreported_memory);
     allocated_unreported_memory = 0;
   }
 

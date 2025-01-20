@@ -60,7 +60,7 @@ namespace ZSTD_NODE {
     }
   }
 
-  StreamCompressor::~StreamCompressor() {
+  void StreamCompressor::Cleanup(const Napi::Env& env) {
     if (dict != NULL) {
       alloc.Free(dict);
     }
@@ -71,6 +71,7 @@ namespace ZSTD_NODE {
       alloc.Free(dst);
     }
     ZSTD_freeCStream(zcs);
+    StreamCoder::Cleanup(env);
   }
 
   Napi::Value StreamCompressor::GetBlockSize(const Napi::CallbackInfo& info) {

@@ -50,7 +50,7 @@ namespace ZSTD_NODE {
       sc->PendingChunksAsArray(Env())
     });
 
-    sc->alloc.ReportMemoryToV8();
+    sc->alloc.ReportMemoryToV8(Env());
   }
 
   void StreamCompressWorker::OnError(const Napi::Error& e) {
@@ -58,7 +58,7 @@ namespace ZSTD_NODE {
       e.Value()
     });
 
-    sc->alloc.ReportMemoryToV8();
+    sc->alloc.ReportMemoryToV8(Env());
   }
 
 }

@@ -4,12 +4,13 @@ namespace ZSTD_NODE {
 
   StreamCoder::StreamCoder() {};
 
-  StreamCoder::~StreamCoder() {
+  void StreamCoder::Cleanup(const Napi::Env& env) {
     size_t nChunks = pending_output.size();
     for (size_t i = 0; i < nChunks; i++) {
       alloc.Free(pending_output[i]);
     }
-    alloc.ReportMemoryToV8();
+    pending_output.clear();
+    alloc.ReportMemoryToV8(env);
   }
 
   Napi::Array StreamCoder::PendingChunksAsArray(const Napi::Env& env) {
@@ -22,7 +23,7 @@ namespace ZSTD_NODE {
       chunks.Set(i, Napi::Buffer<char>::Copy(env, reinterpret_cast<char*>(cur),
         bufInfo->size - bufInfo->available
       ));
-      Allocator::Free(NULL, cur);
+      alloc.Free(cur);
     }
 
     pending_output.clear();

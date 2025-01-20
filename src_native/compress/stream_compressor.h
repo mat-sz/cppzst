@@ -14,12 +14,12 @@ namespace ZSTD_NODE {
     friend class StreamCompressWorker;
     static Napi::Object Init(Napi::Env env, Napi::Object exports);
     StreamCompressor(const Napi::CallbackInfo& info);
-    ~StreamCompressor();
 
   private:
     Napi::Value GetBlockSize(const Napi::CallbackInfo& info);
     void Copy(const Napi::CallbackInfo& info);
     void Compress(const Napi::CallbackInfo& info);
+    void Cleanup(const Napi::Env& env);
 
     ZSTD_CStream *zcs;
 
