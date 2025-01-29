@@ -37,3 +37,4 @@ deps/zstd/README.md
 deps/zstd/SECURITY.md
 deps/zstd/TESTING.md
 dist.sh
+__tests__/
