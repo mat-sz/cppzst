@@ -1,6 +1,6 @@
 {
   "name": "@metastable/cppzst",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "ZSTD streaming wrapper for node.js 18+",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
